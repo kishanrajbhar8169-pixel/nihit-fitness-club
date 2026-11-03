@@ -3,136 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Self Check-In | NIHIT FITNESS CLUB</title>
+    <title>Nihit Fitness Club - Member Check-in Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="max-w-md w-full bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-700">
-        <!-- Gym Header -->
-        <div class="text-center mb-6">
+    <div class="w-full max-w-md bg-gray-800 shadow-2xl rounded-3xl p-6 border border-gray-700 text-center">
+        <!-- Header -->
+        <div class="mb-6">
             <h1 class="text-2xl font-bold text-yellow-400 tracking-wider">⚡ NIHIT FITNESS CLUB</h1>
-            <p class="text-xs text-gray-400 mt-1">Ladhupur, Varanasi | Daily Attendance Portal</p>
+            <p class="text-xs text-gray-400 mt-1">Ledhupur, Varanasi | Self Check-in Portal</p>
         </div>
 
         <!-- Check-in Form -->
-        <form id="checkinForm" class="space-y-4">
+        <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-1">Mobile Number ya Member ID</label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i class="fas fa-user-check"></i>
-                    </span>
-                    <input type="text" id="memberInput" required placeholder="Ex: 8953498882 ya NFC-8741" 
-                        class="w-full pl-10 pr-4 py-3 bg-gray-700 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-yellow-400 text-center font-semibold text-lg">
-                </div>
+                <label class="block text-sm text-gray-300 font-semibold mb-2 text-left">Enter Member ID or Mobile Number</label>
+                <input type="text" id="checkinInput" placeholder="e.g., NFC-8741 or Mobile Number" 
+                    class="w-full bg-gray-700 text-white px-4 py-3 rounded-xl border border-gray-600 focus:outline-none focus:border-yellow-400 text-center text-lg font-bold tracking-wider">
             </div>
 
-            <button type="submit" id="submitBtn" 
-                class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-xl shadow-lg transition duration-200 text-lg flex items-center justify-center gap-2">
-                <i class="fas fa-qrcode"></i> Attendance Mark Karein
+            <button onclick="markAttendance()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-xl font-bold text-base shadow-lg transition flex items-center justify-center gap-2">
+                <i class="fas fa-check-circle"></i> Mark Attendance
             </button>
-        </form>
+        </div>
 
-        <!-- Message Alert -->
-        <div id="alertBox" class="mt-4 hidden p-3 rounded-xl text-center text-sm font-medium"></div>
+        <!-- Response Message Box -->
+        <div id="responseMessage" class="mt-6 hidden p-4 rounded-xl text-sm font-semibold"></div>
 
-        <!-- Footer -->
-        <div class="mt-6 text-center text-xs text-gray-500 border-t border-gray-700 pt-4">
-            Welcome to Gym! Keep Grinding 💪
+        <!-- Navigation Link -->
+        <div class="mt-6 pt-4 border-t border-gray-700">
+            <a href="admin.html" class="text-xs text-gray-400 hover:text-yellow-400 transition flex items-center justify-center gap-1">
+                <i class="fas fa-lock"></i> Go to Admin Dashboard
+            </a>
         </div>
     </div>
 
     <script>
-        // Supabase Configuration (Verified Project ID: upmjbcbodnsbpfyouzkl)
         const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbWpiY2JvZG5zYnBmeW91emtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbWpiY2JvZG5zYnBmeW91emtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const checkinForm = document.getElementById('checkinForm');
-        const memberInput = document.getElementById('memberInput');
-        const alertBox = document.getElementById('alertBox');
-        const submitBtn = document.getElementById('submitBtn');
+        async function markAttendance() {
+            const inputVal = document.getElementById('checkinInput').value.trim();
+            const msgBox = document.getElementById('responseMessage');
 
-        function showAlert(message, isSuccess) {
-            alertBox.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium border";
-            if (isSuccess) {
-                alertBox.classList.add('bg-green-500/20', 'text-green-400', 'border-green-500');
-            } else {
-                alertBox.classList.add('bg-red-500/20', 'text-red-400', 'border-red-500');
+            if (!inputVal) {
+                showMsg("Please enter your Member ID or Mobile Number!", "error");
+                return;
             }
-            alertBox.innerText = message;
-            alertBox.classList.remove('hidden');
+
+            // 1. Search member in 'members' table by member_id or mobile
+            const { data: members, error } = await supabase
+                .from('members')
+                .select('*')
+                .or(`member_id.eq.${inputVal},mobile.eq.${inputVal}`);
+
+            if (error || !members || members.length === 0) {
+                showMsg("❌ Member not found! Please check your ID or Mobile Number.", "error");
+                return;
+            }
+
+            const member = members[0];
+            const memberName = member.full_name || member.name;
+
+            // 2. Insert attendance record into 'attendance' table
+            const { error: attError } = await supabase
+                .from('attendance')
+                .insert([{ member_id: member.member_id, full_name: memberName }]);
+
+            if (attError) {
+                console.error("Attendance Error:", attError);
+                showMsg("⚠️ Error recording attendance. Try again.", "error");
+                return;
+            }
+
+            showMsg(`✅ Attendance Successful!\nWelcome, ${memberName}! 💪`, "success");
+            document.getElementById('checkinInput').value = '';
         }
 
-        checkinForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const inputVal = memberInput.value.trim();
-            if (!inputVal) return;
-
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Checking...";
-
-            try {
-                // 1. Members table me search karein (Mobile ya Member ID se)
-                const { data: members, error: memberError } = await supabase
-                    .from('members')
-                    .select('*')
-                    .or(`mobile.eq.${inputVal},member_id.eq.${inputVal}`);
-
-                if (memberError) {
-                    throw new Error("Member Search Error: " + memberError.message);
-                }
-
-                if (!members || members.length === 0) {
-                    showAlert("❌ Member Nahi Mila! Sahi Mobile ya ID daalein (Jaise: 8953498882).", false);
-                    return;
-                }
-
-                const member = members[0];
-                const today = new Date().toISOString().split('T')[0];
-
-                // 2. Check karein ki aaj ki attendance pehle se to nahi lagi hai
-                const { data: existingAttendance, error: attCheckError } = await supabase
-                    .from('attendance')
-                    .select('*')
-                    .eq('member_id', member.member_id)
-                    .eq('date', today);
-
-                if (attCheckError) {
-                    throw new Error("Attendance Check Error: " + attCheckError.message);
-                }
-
-                if (existingAttendance && existingAttendance.length > 0) {
-                    showAlert(`⚠️ ${member.full_name}, Aapki aaj ki attendance pehle se lagi hui hai!`, false);
-                } else {
-                    // 3. Nayi attendance insert karein
-                    const { error: attError } = await supabase
-                        .from('attendance')
-                        .insert([{ 
-                            member_id: member.member_id, 
-                            date: today, 
-                            time: new Date().toLocaleTimeString() 
-                        }]);
-
-                    if (attError) {
-                        throw new Error("Insert Error: " + attError.message);
-                    } else {
-                        showAlert(`✅ Welcome ${member.full_name}! Aapki Attendance lag gayi hai.`, true);
-                        memberInput.value = '';
-                    }
-                }
-            } catch (err) {
-                console.error(err);
-                showAlert("❌ Error: " + err.message, false);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-qrcode"></i> Attendance Mark Karein';
-            }
-        });
+        function showMsg(text, type) {
+            const msgBox = document.getElementById('responseMessage');
+            msgBox.className = "mt-6 p-4 rounded-xl text-sm font-semibold whitespace-pre-line " + 
+                (type === "success" ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30");
+            msgBox.innerText = text;
+            msgBox.classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
