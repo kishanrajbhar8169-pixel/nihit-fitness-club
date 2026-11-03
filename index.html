@@ -80,33 +80,15 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Fees Amount (₹)</label>
-                    <input type="number" id="amount" placeholder="e.g. 1000"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Payment Status *</label>
-                    <select id="status" class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
-                        <option value="Paid">Paid (फीस जमा है)</option>
-                        <option value="Pending">Pending (फीस बाकी है)</option>
-                    </select>
-                </div>
-            </div>
-
             <button type="submit" id="submitBtn" class="w-full bg-gold-500 hover:bg-gold-600 text-black py-3.5 rounded-xl font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-2 mt-4 tracking-wide">
                 <i class="fas fa-user-plus"></i> REGISTER MEMBER
             </button>
         </form>
-
-        <!-- Message Box -->
-        <div id="formMessage" class="mt-4 hidden p-3.5 rounded-xl text-xs font-semibold text-center"></div>
     </div>
 
     <script>
         const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbWpiY2JvZG5zYnBmeW91emtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
+        const SUPABASE_ANON_KEY = "sb_publishable_yyOXHjb40C@zJ1HoKtkIsA_GhBXp..."; // यहाँ आपकी नई की है
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -115,11 +97,9 @@
             
             const fullName = document.getElementById('fullName').value.trim();
             const mobile = document.getElementById('mobile').value.trim();
-            const age = document.getElementById('age').value.trim();
+            const ageInput = document.getElementById('age').value.trim();
             const gender = document.getElementById('gender').value;
             const plan = document.getElementById('plan').value;
-            const amount = document.getElementById('amount').value.trim();
-            const status = document.getElementById('status').value;
             const submitBtn = document.getElementById('submitBtn');
 
             const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -128,26 +108,33 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
 
-            const { data, error } = await supabase
-                .from('members')
-                .insert([{
-                    member_id: memberId,
-                    full_name: fullName,
-                    mobile: mobile,
-                    plan: plan
-                }]);
+            try {
+                const { data, error } = await supabase
+                    .from('members')
+                    .insert([{
+                        member_id: memberId,
+                        full_name: fullName,
+                        mobile: mobile,
+                        age: ageInput ? parseInt(ageInput) : null,
+                        gender: gender,
+                        plan: plan
+                    }]);
 
-            if (error) {
-                console.error("Error inserting member:", error);
-                alert("Error saving member: " + error.message);
+                if (error) {
+                    alert("Database Error: " + error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fas fa-user-plus"></i> REGISTER MEMBER`;
+                    return;
+                }
+
+                alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}`);
+                window.location.href = "admin.html";
+
+            } catch (err) {
+                alert("Unexpected Error: " + err.message);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-user-plus"></i> REGISTER MEMBER`;
-                return;
             }
-
-            alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}\nPayment Status: ${status}`);
-            document.getElementById('addMemberForm').reset();
-            window.location.href = "admin.html";
         }
     </script>
 </body>
