@@ -1,12 +1,15 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nihit Fitness Club - Member Registration</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
@@ -20,59 +23,71 @@
                     }
                 }
             }
-        }
+        };
     </script>
 </head>
+
 <body class="bg-black text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="w-full max-w-lg bg-gray-900 border border-yellow-500/30 shadow-2xl rounded-3xl p-6 relative">
-        <!-- Header -->
+    <div class="w-full max-w-lg bg-gray-900 border border-yellow-500/30 shadow-2xl rounded-3xl p-6">
+
         <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
             <div>
-                <h1 class="text-2xl font-black text-gold-400 tracking-wider uppercase flex items-center gap-2">
-                    <i class="fas fa-dumbbell text-gold-500"></i> NIHIT FITNESS CLUB
+                <h1 class="text-2xl font-black text-yellow-400 tracking-wider uppercase">
+                    <i class="fas fa-dumbbell"></i> NIHIT FITNESS CLUB
                 </h1>
-                <p class="text-xs text-gray-400 mt-0.5">Ledhupur, Varanasi | New Registration</p>
+                <p class="text-xs text-gray-400 mt-1">Ledhupur, Varanasi | New Registration</p>
             </div>
-            <a href="admin.html" class="bg-gray-800 hover:bg-gold-500 hover:text-black text-gold-400 border border-gold-500/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+
+            <a href="admin.html"
+               class="bg-gray-800 text-yellow-400 border border-yellow-500/40 px-3 py-2 rounded-xl text-xs font-bold">
                 <i class="fas fa-arrow-left"></i> Dashboard
             </a>
         </div>
 
-        <!-- Add Member Form -->
-        <form id="addMemberForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+        <form id="addMemberForm" class="space-y-4">
+
             <div>
-                <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Full Name *</label>
-                <input type="text" id="fullName" required placeholder="Enter member's full name" 
-                    class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                <label class="block text-xs text-yellow-400 font-semibold mb-1">Full Name *</label>
+                <input type="text" id="fullName" required maxlength="100"
+                    placeholder="Enter member's full name"
+                    class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Mobile Number *</label>
-                    <input type="tel" id="mobile" required placeholder="10-digit number" pattern="[0-9]{10}"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Mobile Number *</label>
+                    <input type="tel" id="mobile" required maxlength="10"
+                        pattern="[0-9]{10}" inputmode="numeric"
+                        placeholder="10-digit number"
+                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
                 </div>
+
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Age</label>
-                    <input type="number" id="age" placeholder="e.g. 24"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Age</label>
+                    <input type="number" id="age" min="1" max="120"
+                        placeholder="e.g. 24"
+                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Membership Plan *</label>
-                    <select id="plan" class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Membership Plan *</label>
+                    <select id="plan" required
+                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
                         <option value="1 Month Standard">1 Month Standard</option>
                         <option value="3 Months Special">3 Months Special</option>
                         <option value="6 Months Package">6 Months Package</option>
                         <option value="12 Months VIP">12 Months VIP</option>
                     </select>
                 </div>
+
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Gender</label>
-                    <select id="gender" class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Gender</label>
+                    <select id="gender"
+                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
+                        <option value="">Select Gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
@@ -82,78 +97,134 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Fees Amount (₹)</label>
-                    <input type="number" id="amount" placeholder="e.g. 1000"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Fees Amount (₹)</label>
+                    <input type="number" id="amount" min="0" step="0.01"
+                        placeholder="e.g. 1000"
+                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
                 </div>
+
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Payment Status *</label>
-                    <select id="status" class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Payment Status *</label>
+                    <select id="status" required
+                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
                         <option value="Paid">Paid (फीस जमा है)</option>
                         <option value="Pending">Pending (फीस बाकी है)</option>
                     </select>
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="w-full bg-gold-500 hover:bg-gold-600 text-black py-3.5 rounded-xl font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-2 mt-4 tracking-wide">
+            <button type="submit" id="submitBtn"
+                class="w-full bg-yellow-500 hover:bg-yellow-600 text-black py-3.5 rounded-xl font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 mt-4">
                 <i class="fas fa-user-plus"></i> REGISTER MEMBER
             </button>
+
+            <p id="message" class="text-sm text-center" role="status"></p>
+
         </form>
     </div>
 
     <script>
-        // Supabase Configuration
         const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
-        // सुरक्षित पब्लिक/Anon की का उपयोग (Secret Key कभी Frontend में इस्तेमाल नहीं की गई है)
+
+        // केवल Publishable Key इस्तेमाल करें। Secret Key कभी यहाँ न डालें।
         const SUPABASE_ANON_KEY = "sb_publishable_yyOXHjb4OC0zJ1HoKtkIsA_GhBXp2KP";
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            const fullName = document.getElementById('fullName').value.trim();
-            const mobile = document.getElementById('mobile').value.trim();
-            const ageInput = document.getElementById('age').value.trim();
-            const gender = document.getElementById('gender').value;
-            const plan = document.getElementById('plan').value;
-            const submitBtn = document.getElementById('submitBtn');
+        const db = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
 
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            const memberId = `NFC-${randomNum}`;
+        const form = document.getElementById("addMemberForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", handleFormSubmit);
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            if (!form.reportValidity()) return;
+
+            const fullName = document.getElementById("fullName").value.trim();
+            const mobile = document.getElementById("mobile").value.trim();
+            const ageValue = document.getElementById("age").value;
+            const gender = document.getElementById("gender").value;
+            const plan = document.getElementById("plan").value;
+            const amountValue = document.getElementById("amount").value;
+            const status = document.getElementById("status").value;
+
+            if (!/^[0-9]{10}$/.test(mobile)) {
+                message.textContent = "Please enter a valid 10-digit mobile number.";
+                message.className = "text-sm text-center text-red-400";
+                return;
+            }
+
+            const age = ageValue === "" ? null : Number(ageValue);
+            const amount = amountValue === "" ? null : Number(amountValue);
+
+            if (age !== null && (!Number.isInteger(age) || age < 1 || age > 120)) {
+                message.textContent = "Please enter a valid age.";
+                message.className = "text-sm text-center text-red-400";
+                return;
+            }
+
+            if (amount !== null && (!Number.isFinite(amount) || amount < 0)) {
+                message.textContent = "Please enter a valid fees amount.";
+                message.className = "text-sm text-center text-red-400";
+                return;
+            }
+
+            const memberId = "NFC-" + crypto.randomUUID().toUpperCase();
+
+            const memberData = {
+                member_id: memberId,
+                full_name: fullName,
+                mobile: mobile,
+                age: age,
+                gender: gender || null,
+                plan: plan,
+                amount: amount,
+                status: status
+            };
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            message.textContent = "Saving member details...";
+            message.className = "text-sm text-center text-yellow-400";
 
             try {
-                // Supabase Database Insert Query
-                const { data, error } = await supabase
-                    .from('members')
-                    .insert([{
-                        member_id: memberId,
-                        full_name: fullName,
-                        mobile: mobile,
-                        plan: plan
-                    }]);
+                const { error } = await db
+                    .from("members")
+                    .insert([memberData]);
 
                 if (error) {
-                    alert("Database Error: " + error.message);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = `<i class="fas fa-user-plus"></i> REGISTER MEMBER`;
-                    return;
+                    throw error;
                 }
 
-                alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}`);
-                document.getElementById('addMemberForm').reset();
-                // सफलतापूर्वक रजिस्टर होने के बाद Admin Dashboard पर रीडायरेक्ट करना
+                message.textContent = "Member registered successfully!";
+                message.className = "text-sm text-center text-green-400";
+
+                alert(
+                    "Member Registered Successfully!\n\n" +
+                    "Member ID: " + memberId
+                );
+
+                form.reset();
+
                 window.location.href = "admin.html";
 
-            } catch (err) {
-                alert("Unexpected Error: " + err.message);
+            } catch (error) {
+                console.error("Registration error:", error);
+
+                message.textContent = "Registration failed: " + error.message;
+                message.className = "text-sm text-center text-red-400";
+
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-user-plus"></i> REGISTER MEMBER`;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> REGISTER MEMBER';
             }
         }
     </script>
+
 </body>
 </html>
+```
