@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nihit Fitness Club - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="container mx-auto p-4 max-w-6xl">
+        <header class="bg-white shadow-md rounded-lg p-6 mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">NIHIT FITNESS CLUB - Admin</h1>
+                <p class="text-sm text-gray-500">Ledhupur, Varanasi | Member Management & Attendance</p>
+            </div>
+            <a href="index.html" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium">Go to Attendance Page</a>
+        </header>
+
+        <!-- Search & Filter Bar -->
+        <div class="bg-white shadow-md rounded-lg p-4 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+            <input type="text" id="searchInput" placeholder="Search by name or mobile..." class="border p-2 rounded w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="text-sm text-gray-600 font-medium" id="totalMembersCount">Total Members: 0</div>
+        </div>
+
+        <!-- Members Table -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 text-sm uppercase">
+                            <th class="p-3">Name</th>
+                            <th class="p-3">Mobile</th>
+                            <th class="p-3">Join Date</th>
+                            <th class="p-3">Status / Due</th>
+                            <th class="p-3 text-center">Action / WhatsApp Reminder</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody" class="text-gray-600 text-sm divide-y divide-gray-200">
+                        <!-- Data will load here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function fetchMembers() {
+            const { data, error } = await supabaseClient
+                .from('members')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching members:', error);
+                return;
+            }
+
+            renderTable(data);
+        }
+
+        function renderTable(members) {
+            const tbody = document.getElementById('membersTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('totalMembersCount').innerText = `Total Members: ${members.length}`;
+
+            const today = new Date();
+
+            members.forEach(member => {
+                const joinDate = new Date(member.created_at || member.join_date);
+                const diffTime = Math.abs(today - joinDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                const isExpired = diffDays >= 30;
+                
+                const tr = document.createElement('tr');
+                if(isExpired) {
+                    tr.classList.add('bg-red-50');
+                }
+
+                const messageText = encodeURIComponent(`Hello ${member.name}, your monthly membership at Nihit Fitness Club, Ledhupur is due/expired. Please clear your dues. Thank you!`);
+                const whatsappLink = `https://wa.me/91${member.mobile}?text=${messageText}`;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-gray-800">${member.name}</td>
+                    <td class="p-3">${member.mobile}</td>
+                    <td class="p-3">${joinDate.toLocaleDateString()}</td>
+                    <td class="p-3">
+                        ${isExpired ? '<span class="text-red-600 font-bold">1 Month Completed (Due)</span>' : `<span class="text-green-600">Active (${30 - diffDays} days left)</span>`}
+                    </td>
+                    <td class="p-3 text-center">
+                        <a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white px-3 py-1.5 rounded hover:bg-green-600 text-xs font-semibold inline-flex items-center gap-1">
+                            💬 Send Reminder
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        fetchMembers();
+    </script>
+</body>
+</html>
