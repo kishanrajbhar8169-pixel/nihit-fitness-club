@@ -46,9 +46,8 @@
     </div>
 
     <script>
-        // Supabase Initialization
-        const SUPABASE_URL = "https://YOUR_SUPABASE_URL.supabase.co"; // Apni Supabase URL yahan rakhein
-        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"; // Apni Supabase Key yahan rakhein
+        const SUPABASE_URL = "https://xuwovqjghzflxkqwlnuy.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1d292cWpnaHpmbHhocWx3bnV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5"; 
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const checkinForm = document.getElementById('checkinForm');
@@ -75,7 +74,6 @@
             submitBtn.innerText = "Processing...";
 
             try {
-                // Member search in Database
                 const { data: members, error } = await supabase
                     .from('members')
                     .select('*')
@@ -87,7 +85,6 @@
                     const member = members[0];
                     const today = new Date().toISOString().split('T')[0];
 
-                    // Check if attendance already marked today
                     const { data: existingAttendance } = await supabase
                         .from('attendance')
                         .select('*')
@@ -97,7 +94,6 @@
                     if (existingAttendance && existingAttendance.length > 0) {
                         showAlert(`⚠️ ${member.full_name}, Aapki aaj ki attendance pehle se lagi hui hai!`, false);
                     } else {
-                        // Mark new attendance
                         const { error: attError } = await supabase
                             .from('attendance')
                             .insert([{ member_id: member.member_id, date: today, time: new Date().toLocaleTimeString() }]);
