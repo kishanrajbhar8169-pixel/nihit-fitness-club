@@ -56,7 +56,6 @@
                 return;
             }
 
-            // 1. Search member in 'members' table by member_id or mobile
             const { data: members, error } = await supabase
                 .from('members')
                 .select('*')
@@ -70,7 +69,6 @@
             const member = members[0];
             const memberName = member.full_name || member.name;
 
-            // 2. Insert attendance record into 'attendance' table
             const { error: attError } = await supabase
                 .from('attendance')
                 .insert([{ member_id: member.member_id, full_name: memberName }]);
