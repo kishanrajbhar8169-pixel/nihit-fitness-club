@@ -46,8 +46,10 @@
     </div>
 
     <script>
+        // Supabase Configuration (Verified Project ID: upmjbcbodnsbpfyouzkl)
         const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbWpiY2JvZG5zYnBmeW91emtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
+        
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const checkinForm = document.getElementById('checkinForm');
@@ -63,6 +65,7 @@
                 alertBox.classList.add('bg-red-500/20', 'text-red-400', 'border-red-500');
             }
             alertBox.innerText = message;
+            alertBox.classList.remove('hidden');
         }
 
         checkinForm.addEventListener('submit', async (e) => {
@@ -71,43 +74,60 @@
             if (!inputVal) return;
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
+            submitBtn.innerText = "Checking...";
 
             try {
-                const { data: members, error } = await supabase
+                // 1. Members table me search karein (Mobile ya Member ID se)
+                const { data: members, error: memberError } = await supabase
                     .from('members')
                     .select('*')
                     .or(`mobile.eq.${inputVal},member_id.eq.${inputVal}`);
 
-                if (error || !members || members.length === 0) {
-                    showAlert("❌ Member Nahi Mila! Sahi Mobile ya ID daalein.", false);
+                if (memberError) {
+                    throw new Error("Member Search Error: " + memberError.message);
+                }
+
+                if (!members || members.length === 0) {
+                    showAlert("❌ Member Nahi Mila! Sahi Mobile ya ID daalein (Jaise: 8953498882).", false);
+                    return;
+                }
+
+                const member = members[0];
+                const today = new Date().toISOString().split('T')[0];
+
+                // 2. Check karein ki aaj ki attendance pehle se to nahi lagi hai
+                const { data: existingAttendance, error: attCheckError } = await supabase
+                    .from('attendance')
+                    .select('*')
+                    .eq('member_id', member.member_id)
+                    .eq('date', today);
+
+                if (attCheckError) {
+                    throw new Error("Attendance Check Error: " + attCheckError.message);
+                }
+
+                if (existingAttendance && existingAttendance.length > 0) {
+                    showAlert(`⚠️ ${member.full_name}, Aapki aaj ki attendance pehle se lagi hui hai!`, false);
                 } else {
-                    const member = members[0];
-                    const today = new Date().toISOString().split('T')[0];
-
-                    const { data: existingAttendance } = await supabase
+                    // 3. Nayi attendance insert karein
+                    const { error: attError } = await supabase
                         .from('attendance')
-                        .select('*')
-                        .eq('member_id', member.member_id)
-                        .eq('date', today);
+                        .insert([{ 
+                            member_id: member.member_id, 
+                            date: today, 
+                            time: new Date().toLocaleTimeString() 
+                        }]);
 
-                    if (existingAttendance && existingAttendance.length > 0) {
-                        showAlert(`⚠️ ${member.full_name}, Aaj ki attendance pehle se lagi hui hai!`, false);
+                    if (attError) {
+                        throw new Error("Insert Error: " + attError.message);
                     } else {
-                        const { error: attError } = await supabase
-                            .from('attendance')
-                            .insert([{ member_id: member.member_id, date: today, time: new Date().toLocaleTimeString() }]);
-
-                        if (attError) {
-                            showAlert("❌ Attendance mark karne me error aayi.", false);
-                        } else {
-                            showAlert(`✅ Welcome ${member.full_name}! Attendance lag gayi hai.`, true);
-                            memberInput.value = '';
-                        }
+                        showAlert(`✅ Welcome ${member.full_name}! Aapki Attendance lag gayi hai.`, true);
+                        memberInput.value = '';
                     }
                 }
             } catch (err) {
-                showAlert("❌ Connection Error! Internet check karein.", false);
+                console.error(err);
+                showAlert("❌ Error: " + err.message, false);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-qrcode"></i> Attendance Mark Karein';
