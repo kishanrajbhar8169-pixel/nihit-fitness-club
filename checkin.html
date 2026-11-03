@@ -47,8 +47,8 @@
 
     <script>
         const SUPABASE_URL = "https://xuwovqjghzflxkqwlnuy.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1d292cWpnaHpmbHhocWx3bnV5Iiwicm9sZSI6Inh1bnVuZXkiLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1d292cWpnaHpmbHhocWx3bnV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const checkinForm = document.getElementById('checkinForm');
         const memberInput = document.getElementById('memberInput');
