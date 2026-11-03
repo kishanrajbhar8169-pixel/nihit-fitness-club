@@ -80,6 +80,21 @@
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Fees Amount (₹)</label>
+                    <input type="number" id="amount" placeholder="e.g. 1000"
+                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-1">Payment Status *</label>
+                    <select id="status" class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-sm">
+                        <option value="Paid">Paid (फीस जमा है)</option>
+                        <option value="Pending">Pending (फीस बाकी है)</option>
+                    </select>
+                </div>
+            </div>
+
             <button type="submit" id="submitBtn" class="w-full bg-gold-500 hover:bg-gold-600 text-black py-3.5 rounded-xl font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-2 mt-4 tracking-wide">
                 <i class="fas fa-user-plus"></i> REGISTER MEMBER
             </button>
@@ -100,6 +115,8 @@
             const ageInput = document.getElementById('age').value.trim();
             const gender = document.getElementById('gender').value;
             const plan = document.getElementById('plan').value;
+            const amountInput = document.getElementById('amount').value.trim();
+            const status = document.getElementById('status').value;
             const submitBtn = document.getElementById('submitBtn');
 
             const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -127,7 +144,8 @@
                     return;
                 }
 
-                alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}`);
+                alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}\nPayment Status: ${status}`);
+                document.getElementById('addMemberForm').reset();
                 window.location.href = "admin.html";
 
             } catch (err) {
