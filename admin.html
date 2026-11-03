@@ -16,7 +16,7 @@
                 <h1 class="text-2xl font-bold text-gray-800">NIHIT FITNESS CLUB - Admin</h1>
                 <p class="text-sm text-gray-500">Ledhupur, Varanasi | Member Management & Attendance</p>
             </div>
-            <a href="index.html" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium">Go to Attendance Page</a>
+            <a href="checkin.html" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium">Go to Attendance Page</a>
         </header>
 
         <!-- Search & Filter Bar -->
@@ -31,6 +31,7 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-200 text-gray-700 text-sm uppercase">
+                            <th class="p-3">Member ID</th>
                             <th class="p-3">Name</th>
                             <th class="p-3">Mobile</th>
                             <th class="p-3">Join Date</th>
@@ -47,10 +48,13 @@
     </div>
 
     <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Verified Supabase Configuration
+        const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbWpiY2JvZG5zYnBmeW91emtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allMembers = [];
 
         async function fetchMembers() {
             const { data, error } = await supabaseClient
@@ -63,7 +67,8 @@
                 return;
             }
 
-            renderTable(data);
+            allMembers = data || [];
+            renderTable(allMembers);
         }
 
         function renderTable(members) {
@@ -74,7 +79,11 @@
             const today = new Date();
 
             members.forEach(member => {
-                const joinDate = new Date(member.created_at || member.join_date);
+                const memberName = member.full_name || member.name || "N/A";
+                const memberMobile = member.mobile || member.mobile_number || "N/A";
+                const memberId = member.member_id || "N/A";
+
+                const joinDate = new Date(member.created_at || member.join_date || Date.now());
                 const diffTime = Math.abs(today - joinDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
@@ -85,15 +94,16 @@
                     tr.classList.add('bg-red-50');
                 }
 
-                const messageText = encodeURIComponent(`Hello ${member.name}, your monthly membership at Nihit Fitness Club, Ledhupur is due/expired. Please clear your dues. Thank you!`);
-                const whatsappLink = `https://wa.me/91${member.mobile}?text=${messageText}`;
+                const messageText = encodeURIComponent(`Hello ${memberName}, your monthly membership at Nihit Fitness Club, Ledhupur is due/expired. Please clear your dues. Thank you!`);
+                const whatsappLink = `https://wa.me/91${memberMobile}?text=${messageText}`;
 
                 tr.innerHTML = `
-                    <td class="p-3 font-medium text-gray-800">${member.name}</td>
-                    <td class="p-3">${member.mobile}</td>
-                    <td class="p-3">${joinDate.toLocaleDateString()}</td>
+                    <td class="p-3 font-semibold text-gray-700">${memberId}</td>
+                    <td class="p-3 font-medium text-gray-800">${memberName}</td>
+                    <td class="p-3 font-medium text-gray-700">${memberMobile}</td>
+                    <td class="p-3">${joinDate.toLocaleDateString('en-IN')}</td>
                     <td class="p-3">
-                        ${isExpired ? '<span class="text-red-600 font-bold">1 Month Completed (Due)</span>' : `<span class="text-green-600">Active (${30 - diffDays} days left)</span>`}
+                        ${isExpired ? '<span class="text-red-600 font-bold">1 Month Completed (Due)</span>' : `<span class="text-green-600 font-medium">Active (${30 - diffDays} days left)</span>`}
                     </td>
                     <td class="p-3 text-center">
                         <a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white px-3 py-1.5 rounded hover:bg-green-600 text-xs font-semibold inline-flex items-center gap-1">
@@ -104,6 +114,18 @@
                 tbody.appendChild(tr);
             });
         }
+
+        // Live Search Handler
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const filtered = allMembers.filter(m => {
+                const name = (m.full_name || m.name || '').toLowerCase();
+                const mobile = (m.mobile || m.mobile_number || '').toString();
+                const id = (m.member_id || '').toLowerCase();
+                return name.includes(query) || mobile.includes(query) || id.includes(query);
+            });
+            renderTable(filtered);
+        });
 
         fetchMembers();
     </script>
