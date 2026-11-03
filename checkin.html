@@ -46,8 +46,8 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://xuwovqjghzflxkqwlnuy.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1d292cWpnaHpmbHhocWx3bnV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
+        const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbWpiY2JvZG5zYnBmeW91emtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const checkinForm = document.getElementById('checkinForm');
@@ -56,11 +56,11 @@
         const submitBtn = document.getElementById('submitBtn');
 
         function showAlert(message, isSuccess) {
-            alertBox.classList.remove('hidden', 'bg-red-500/20', 'text-red-400', 'bg-green-500/20', 'text-green-400', 'border-red-500', 'border-green-500');
+            alertBox.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium border";
             if (isSuccess) {
-                alertBox.classList.add('bg-green-500/20', 'text-green-400', 'border', 'border-green-500');
+                alertBox.classList.add('bg-green-500/20', 'text-green-400', 'border-green-500');
             } else {
-                alertBox.classList.add('bg-red-500/20', 'text-red-400', 'border', 'border-red-500');
+                alertBox.classList.add('bg-red-500/20', 'text-red-400', 'border-red-500');
             }
             alertBox.innerText = message;
         }
@@ -80,7 +80,7 @@
                     .or(`mobile.eq.${inputVal},member_id.eq.${inputVal}`);
 
                 if (error || !members || members.length === 0) {
-                    showAlert("❌ Member Nahi Mila! Kripya sahi ID ya Mobile daalein.", false);
+                    showAlert("❌ Member Nahi Mila! Sahi Mobile ya ID daalein.", false);
                 } else {
                     const member = members[0];
                     const today = new Date().toISOString().split('T')[0];
@@ -92,22 +92,22 @@
                         .eq('date', today);
 
                     if (existingAttendance && existingAttendance.length > 0) {
-                        showAlert(`⚠️ ${member.full_name}, Aapki aaj ki attendance pehle se lagi hui hai!`, false);
+                        showAlert(`⚠️ ${member.full_name}, Aaj ki attendance pehle se lagi hui hai!`, false);
                     } else {
                         const { error: attError } = await supabase
                             .from('attendance')
                             .insert([{ member_id: member.member_id, date: today, time: new Date().toLocaleTimeString() }]);
 
                         if (attError) {
-                            showAlert("❌ Attendance record karne mein dikkat aayi.", false);
+                            showAlert("❌ Attendance mark karne me error aayi.", false);
                         } else {
-                            showAlert(`✅ Welcome ${member.full_name}! Aapki Attendance lag gayi hai.`, true);
+                            showAlert(`✅ Welcome ${member.full_name}! Attendance lag gayi hai.`, true);
                             memberInput.value = '';
                         }
                     }
                 }
             } catch (err) {
-                showAlert("❌ Connection Error! Kripya dobara try karein.", false);
+                showAlert("❌ Connection Error! Internet check karein.", false);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-qrcode"></i> Attendance Mark Karein';
