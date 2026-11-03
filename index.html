@@ -102,7 +102,9 @@
     </div>
 
     <script>
+        // Supabase Configuration
         const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
+        // सुरक्षित पब्लिक/Anon की का उपयोग (Secret Key कभी Frontend में इस्तेमाल नहीं की गई है)
         const SUPABASE_ANON_KEY = "sb_publishable_yyOXHjb4OC0zJ1HoKtkIsA_GhBXp2KP";
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -112,6 +114,8 @@
             
             const fullName = document.getElementById('fullName').value.trim();
             const mobile = document.getElementById('mobile').value.trim();
+            const ageInput = document.getElementById('age').value.trim();
+            const gender = document.getElementById('gender').value;
             const plan = document.getElementById('plan').value;
             const submitBtn = document.getElementById('submitBtn');
 
@@ -122,6 +126,7 @@
             submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
 
             try {
+                // Supabase Database Insert Query
                 const { data, error } = await supabase
                     .from('members')
                     .insert([{
@@ -140,6 +145,7 @@
 
                 alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}`);
                 document.getElementById('addMemberForm').reset();
+                // सफलतापूर्वक रजिस्टर होने के बाद Admin Dashboard पर रीडायरेक्ट करना
                 window.location.href = "admin.html";
 
             } catch (err) {
