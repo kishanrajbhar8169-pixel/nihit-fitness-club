@@ -103,7 +103,8 @@
 
     <script>
         const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_yyOXHjb40C@zJ1HoKtkIsA_GhBXp";
+        // NICHE APNI eyJ... VALI KEY PASTE KAREIN
+        const SUPABASE_ANON_KEY = "PASTE_YOUR_EYJ_KEY_HERE"; 
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -112,11 +113,7 @@
             
             const fullName = document.getElementById('fullName').value.trim();
             const mobile = document.getElementById('mobile').value.trim();
-            const ageInput = document.getElementById('age').value.trim();
-            const gender = document.getElementById('gender').value;
             const plan = document.getElementById('plan').value;
-            const amountInput = document.getElementById('amount').value.trim();
-            const status = document.getElementById('status').value;
             const submitBtn = document.getElementById('submitBtn');
 
             const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -126,7 +123,6 @@
             submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
 
             try {
-                // सिर्फ बुनियादी कॉलम भेज रहे हैं जो 100% टेबल में मौजूद हैं
                 const { data, error } = await supabase
                     .from('members')
                     .insert([{
@@ -143,7 +139,7 @@
                     return;
                 }
 
-                alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}\nPayment Status: ${status}`);
+                alert(`✅ Member Registered Successfully!\nMember ID: ${memberId}`);
                 document.getElementById('addMemberForm').reset();
                 window.location.href = "admin.html";
 
