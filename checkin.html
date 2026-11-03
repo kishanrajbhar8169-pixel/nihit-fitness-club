@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nihit Fitness Club - Member Check-in Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#FACC15',
+                            500: '#EAB308',
+                            600: '#CA8A04'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-black text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
+    <div class="w-full max-w-md bg-gray-900 border border-yellow-500/30 shadow-2xl rounded-3xl p-6 text-center relative">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-black text-gold-400 tracking-wider uppercase flex items-center justify-center gap-2">
+                <i class="fas fa-dumbbell text-gold-500"></i> NIHIT FITNESS CLUB
+            </h1>
+            <p class="text-xs text-gray-400 mt-1">Ledhupur, Varanasi | Self Check-in Portal</p>
+        </div>
+
+        <!-- Check-in Form -->
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-gold-400 font-semibold mb-2 text-left">Enter Member ID or Mobile</label>
+                <input type="text" id="checkinInput" placeholder="e.g. NFC-4921 or 10-digit mobile" 
+                    class="w-full bg-black text-white px-4 py-3.5 rounded-xl border border-gray-800 focus:outline-none focus:border-gold-500 text-center text-lg font-bold tracking-wider">
+            </div>
+
+            <button onclick="markAttendance()" class="w-full bg-gold-500 hover:bg-gold-600 text-black py-3.5 rounded-xl font-extrabold text-base shadow-lg transition flex items-center justify-center gap-2">
+                <i class="fas fa-check-circle"></i> MARK ATTENDANCE
+            </button>
+        </div>
+
+        <!-- Response Message Box -->
+        <div id="responseMessage" class="mt-6 hidden p-4 rounded-xl text-sm font-semibold whitespace-pre-line"></div>
+
+        <!-- Navigation Link -->
+        <div class="mt-6 pt-4 border-t border-gray-800">
+            <a href="admin.html" class="text-xs text-gray-400 hover:text-gold-400 transition flex items-center justify-center gap-1">
+                <i class="fas fa-lock"></i> Go to Admin Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://upmjbcbodnsbpfyouzkl.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbWpiY2JvZG5zYnBmeW91emtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg2NjYsImV4cCI6MjA1NjgxNDY2Nn0.V5zXJkF6Y6F3k1vK8K5K5K5K5K5K5K5K5K5K5K5K5K5";
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function markAttendance() {
+            const inputVal = document.getElementById('checkinInput').value.trim();
+
+            if (!inputVal) {
+                showMsg("⚠️ Please enter your Member ID or Mobile Number!", "error");
+                return;
+            }
+
+            // Find member in database
+            const { data: members, error } = await supabase
+                .from('members')
+                .select('*')
+                .or(`member_id.eq.${inputVal},mobile.eq.${inputVal}`);
+
+            if (error || !members || members.length === 0) {
+                showMsg("❌ Member not found! Please check your ID or Mobile Number.", "error");
+                return;
+            }
+
+            const member = members[0];
+            const memberName = member.full_name || member.name;
+
+            // Insert into attendance table
+            const { error: attError } = await supabase
+                .from('attendance')
+                .insert([{ member_id: member.member_id, full_name: memberName }]);
+
+            if (attError) {
+                console.error("Attendance Error:", attError);
+                showMsg("⚠️ Error recording attendance. Try again.", "error");
+                return;
+            }
+
+            showMsg(`✅ Attendance Successful!\nWelcome, ${memberName}! 💪`, "success");
+            document.getElementById('checkinInput').value = '';
+        }
+
+        function showMsg(text, type) {
+            const msgBox = document.getElementById('responseMessage');
+            msgBox.className = "mt-6 p-4 rounded-xl text-sm font-semibold whitespace-pre-line " + 
+                (type === "success" ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30");
+            msgBox.innerText = text;
+            msgBox.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
