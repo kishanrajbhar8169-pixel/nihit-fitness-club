@@ -126,14 +126,13 @@
             submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
 
             try {
+                // सिर्फ बुनियादी कॉलम भेज रहे हैं जो 100% टेबल में मौजूद हैं
                 const { data, error } = await supabase
                     .from('members')
                     .insert([{
                         member_id: memberId,
                         full_name: fullName,
                         mobile: mobile,
-                        age: ageInput ? parseInt(ageInput) : null,
-                        gender: gender,
                         plan: plan
                     }]);
 
