@@ -71,7 +71,7 @@
                             <th class="p-4">Status</th>
                         </tr>
                     </thead>
-                    <tbody id="membersTableBody" class="text-gray-300 text-sm divide-y divide-gray-700">
+                    <tbody id="membersTableBody" class="text-gray-300 text-sm divide-y divide-gray-750">
                         <!-- Data loaded dynamically -->
                     </tbody>
                 </table>
@@ -110,7 +110,8 @@
 
             members.forEach(member => {
                 const memberName = member.full_name || member.name || "N/A";
-                const memberMobile = member.mobile || member.mobile_number || "N/A";
+                // Yahan database ke 'mobile' column ko pakadne ke liye sahi property set ki gayi hai
+                const memberMobile = member.mobile || member.mobile_number || member.phone || "N/A";
                 const memberId = member.member_id || "N/A";
                 const memberPlan = member.plan || member.membership_plan || "Monthly (Standard)";
 
