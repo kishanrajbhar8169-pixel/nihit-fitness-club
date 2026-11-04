@@ -1,15 +1,11 @@
-```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nihit Fitness Club - Member Registration</title>
-
+    <title>Nihit Fitness Club - Admin Dashboard & Attendance</title>
+    <!-- Tailwind CSS for Premium Black & Gold UI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
     <script>
         tailwind.config = {
             theme: {
@@ -18,213 +14,423 @@
                         gold: {
                             400: '#FACC15',
                             500: '#EAB308',
-                            600: '#CA8A04'
+                            600: '#CA8A04',
                         }
                     }
                 }
             }
-        };
+        }
     </script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Html5-Qrcode Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
+<body class="bg-black text-white font-sans antialiased min-h-screen">
 
-<body class="bg-black text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <!-- Top Header -->
+    <header class="bg-zinc-900 border-b border-gold-500/30 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl font-black tracking-wider text-gold-400">⚡ NIHIT FITNESS CLUB</span>
+            <span class="text-xs bg-gold-500/10 text-gold-400 border border-gold-500/30 px-2 py-1 rounded">Admin & Portal</span>
+        </div>
+        <div class="text-sm text-zinc-400">
+            Location: <span class="text-white font-semibold">Lehupur, Varanasi</span>
+        </div>
+    </header>
 
-    <div class="w-full max-w-lg bg-gray-900 border border-yellow-500/30 shadow-2xl rounded-3xl p-6">
-
-        <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+    <!-- Main Container -->
+    <main class="p-6 max-w-7xl mx-auto space-y-6">
+        
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-zinc-900 to-zinc-950 border border-gold-500/20 p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-black text-yellow-400 tracking-wider uppercase">
-                    <i class="fas fa-dumbbell"></i> NIHIT FITNESS CLUB
-                </h1>
-                <p class="text-xs text-gray-400 mt-1">Ledhupur, Varanasi | New Registration</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-white">Welcome, Admin! 👋</h1>
+                <p class="text-zinc-400 text-sm mt-1">Manage your 300+ members, attendance, and gym revenue seamlessly.</p>
             </div>
-
-            <a href="admin.html"
-               class="bg-gray-800 text-yellow-400 border border-yellow-500/40 px-3 py-2 rounded-xl text-xs font-bold">
-                <i class="fas fa-arrow-left"></i> Dashboard
-            </a>
+            <button onclick="loadDashboardData()" class="bg-gold-500 hover:bg-gold-600 text-black font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-gold-500/20 flex items-center gap-2">
+                🔄 Refresh Stats
+            </button>
         </div>
 
-        <form id="addMemberForm" class="space-y-4">
-
-            <div>
-                <label class="block text-xs text-yellow-400 font-semibold mb-1">Full Name *</label>
-                <input type="text" id="fullName" required maxlength="100"
-                    placeholder="Enter member's full name"
-                    class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-zinc-900/80 border border-zinc-800 p-5 rounded-2xl shadow-md border-l-4 border-l-gold-500">
+                <p class="text-xs text-zinc-400 uppercase font-semibold">Total Members</p>
+                <h3 id="total-members" class="text-3xl font-extrabold text-white mt-2">0</h3>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Mobile Number *</label>
-                    <input type="tel" id="mobile" required maxlength="10"
-                        pattern="[0-9]{10}" inputmode="numeric"
-                        placeholder="10-digit number"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
-                </div>
-
-                <div>
-                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Age</label>
-                    <input type="number" id="age" min="1" max="120"
-                        placeholder="e.g. 24"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
-                </div>
+            <div class="bg-zinc-900/80 border border-zinc-800 p-5 rounded-2xl shadow-md border-l-4 border-l-emerald-500">
+                <p class="text-xs text-zinc-400 uppercase font-semibold">Active Members</p>
+                <h3 id="active-members" class="text-3xl font-extrabold text-emerald-400 mt-2">0</h3>
             </div>
+            <div class="bg-zinc-900/80 border border-zinc-800 p-5 rounded-2xl shadow-md border-l-4 border-l-amber-500">
+                <p class="text-xs text-zinc-400 uppercase font-semibold">Today's Attendance</p>
+                <h3 id="today-attendance" class="text-3xl font-extrabold text-amber-400 mt-2">0</h3>
+            </div>
+            <div class="bg-zinc-900/80 border border-zinc-800 p-5 rounded-2xl shadow-md border-l-4 border-l-rose-500">
+                <p class="text-xs text-zinc-400 uppercase font-semibold">Pending Fees</p>
+                <h3 id="pending-fees" class="text-3xl font-extrabold text-rose-400 mt-2">0</h3>
+            </div>
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Quick Controls -->
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-xl">
+            <h2 class="text-lg font-bold text-gold-400 mb-4 flex items-center gap-2">🛠️ Quick Controls</h2>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="toggleModal('add-member-modal', true)" class="bg-gold-500 hover:bg-gold-600 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition shadow-md shadow-gold-500/20">
+                    ➕ Add New Member
+                </button>
+                <button onclick="openScannerModal()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2.5 rounded-xl border border-zinc-700 text-sm font-medium transition">
+                    📷 Camera QR Scanner
+                </button>
+                <button onclick="toggleModal('self-attendance-modal', true)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition shadow-md shadow-emerald-600/20">
+                    📱 Phonepe Style Self-Checkin QR
+                </button>
+                <button onclick="toggleModal('fees-modal', true)" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2.5 rounded-xl border border-zinc-700 text-sm font-medium transition">
+                    💰 Record Fees Payment
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Members Section -->
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-xl">
+            <h2 class="text-lg font-bold text-gold-400 mb-4">📋 Recent Members List</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-zinc-300">
+                    <thead class="bg-zinc-950 text-gold-400 uppercase text-xs border-b border-zinc-800">
+                        <tr>
+                            <th class="p-3">Member ID</th>
+                            <th class="p-3">Full Name</th>
+                            <th class="p-3">Mobile</th>
+                            <th class="p-3">Plan</th>
+                            <th class="p-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        <tr>
+                            <td colspan="5" class="p-4 text-center text-zinc-500">Connecting to Supabase database...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Add Member Modal -->
+    <div id="add-member-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-gold-500/30 w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-gold-400">➕ Add New Gym Member</h3>
+                <button onclick="toggleModal('add-member-modal', false)" class="text-zinc-400 hover:text-white text-lg font-bold">✕</button>
+            </div>
+            
+            <form id="add-member-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Membership Plan *</label>
-                    <select id="plan" required
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
-                        <option value="1 Month Standard">1 Month Standard</option>
+                    <label class="block text-xs uppercase text-zinc-400 font-semibold mb-1">Full Name</label>
+                    <input type="text" id="full_name" required placeholder="e.g. Rahul Singh" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-gold-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 font-semibold mb-1">Mobile Number</label>
+                    <input type="tel" id="mobile_number" required placeholder="e.g. 9876543210" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-gold-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 font-semibold mb-1">Membership Plan</label>
+                    <select id="membership_plan" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-gold-500 outline-none">
+                        <option value="Monthly (Standard)">Monthly (Standard)</option>
                         <option value="3 Months Special">3 Months Special</option>
-                        <option value="6 Months Package">6 Months Package</option>
-                        <option value="12 Months VIP">12 Months VIP</option>
+                        <option value="6 Months Advanced">6 Months Advanced</option>
+                        <option value="1 Year VIP">1 Year VIP</option>
                     </select>
                 </div>
-
                 <div>
-                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Gender</label>
-                    <select id="gender"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
+                    <label class="block text-xs uppercase text-zinc-400 font-semibold mb-1">Payment Status</label>
+                    <select id="payment_status" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-gold-500 outline-none">
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Fees Amount (₹)</label>
-                    <input type="number" id="amount" min="0" step="0.01"
-                        placeholder="e.g. 1000"
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="toggleModal('add-member-modal', false)" class="w-1/2 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl font-semibold transition">Cancel</button>
+                    <button type="submit" id="save-btn" class="w-1/2 bg-gold-500 hover:bg-gold-600 text-black py-2.5 rounded-xl font-bold transition">Save Member</button>
                 </div>
-
-                <div>
-                    <label class="block text-xs text-yellow-400 font-semibold mb-1">Payment Status *</label>
-                    <select id="status" required
-                        class="w-full bg-black text-white px-4 py-3 rounded-xl border border-gray-800 text-sm">
-                        <option value="Paid">Paid (फीस जमा है)</option>
-                        <option value="Pending">Pending (फीस बाकी है)</option>
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit" id="submitBtn"
-                class="w-full bg-yellow-500 hover:bg-yellow-600 text-black py-3.5 rounded-xl font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 mt-4">
-                <i class="fas fa-user-plus"></i> REGISTER MEMBER
-            </button>
-
-            <p id="message" class="text-sm text-center" role="status"></p>
-
-        </form>
+            </form>
+        </div>
     </div>
 
+    <!-- Live QR Scanner Attendance Modal -->
+    <div id="scanner-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-gold-500/30 w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-gold-400">📷 Scan Member QR / ID</h3>
+                <button onclick="closeScannerModal()" class="text-zinc-400 hover:text-white text-lg font-bold">✕</button>
+            </div>
+            <div id="reader" class="w-full rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950"></div>
+            <div id="scan-result" class="text-center text-sm text-gold-400 font-medium">Camera starting...</div>
+            <form onsubmit="handleAttendanceSubmit(event)" class="space-y-3 pt-2 border-t border-zinc-800">
+                <label class="block text-xs uppercase text-zinc-400 font-semibold">Or Enter ID Manually</label>
+                <div class="flex gap-2">
+                    <input type="text" id="attendance_member_id" placeholder="e.g. NFC-8000" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-white focus:border-gold-500 outline-none text-sm">
+                    <button type="submit" id="attendance-btn" class="bg-gold-500 hover:bg-gold-600 text-black px-4 py-2 rounded-xl font-bold text-sm transition">Mark</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Phonepe Style Self-Checkin Modal (Gate QR View) -->
+    <div id="self-attendance-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-emerald-500/30 w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-emerald-400">📱 Member Self Attendance Portal</h3>
+                <button onclick="toggleModal('self-attendance-modal', false)" class="text-zinc-400 hover:text-white text-lg font-bold">✕</button>
+            </div>
+            <p class="text-xs text-zinc-400">Gate par yahi screen ya iska QR code laga sakte hain. Member apna ID daal kar turant attendance lagayenge:</p>
+            
+            <form onsubmit="handleSelfAttendance(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 font-semibold mb-1">Enter Your Member ID</label>
+                    <input type="text" id="self_member_id" required placeholder="e.g. NFC-6090" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-emerald-500 outline-none font-mono text-lg text-emerald-300">
+                </div>
+                <button type="submit" id="self-att-btn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-3 rounded-xl transition text-base shadow-lg shadow-emerald-500/20">
+                    ✅ Check-in / Mark Attendance
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Record Fees Payment Modal -->
+    <div id="fees-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-gold-500/30 w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-gold-400">💰 Record Fees Payment</h3>
+                <button onclick="toggleModal('fees-modal', false)" class="text-zinc-400 hover:text-white text-lg font-bold">✕</button>
+            </div>
+            <form onsubmit="handleFeesSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 font-semibold mb-1">Enter Member ID</label>
+                    <input type="text" id="fees_member_id" required placeholder="e.g. NFC-8000" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-gold-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 font-semibold mb-1">Update Status</label>
+                    <select id="fees_status" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-gold-500 outline-none">
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="toggleModal('fees-modal', false)" class="w-1/2 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl font-semibold transition">Cancel</button>
+                    <button type="submit" id="fees-btn" class="w-1/2 bg-gold-500 hover:bg-gold-600 text-black py-2.5 rounded-xl font-bold transition">Update Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script & Logic -->
     <script>
-        const SUPABASE_URL =sb_publishable_yyOXHjb4OC0zJ1HoKtkIsA_GhBXp2KP
+        const SUPABASE_URL = 'https://upmjbcbodnsbpfyouzkh.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_yyOXHjb4OC0zJ1HoKtkIsA_GhBXp2KP';
 
-        // केवल Publishable Key इस्तेमाल करें। Secret Key कभी यहाँ न डालें।
-        const SUPABASE_ANON_KEY =
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const db = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_ANON_KEY
-        );
+        let html5QrCode = null;
 
-        const form = document.getElementById("addMemberForm");
-        const submitBtn = document.getElementById("submitBtn");
-        const message = document.getElementById("message");
+        function toggleModal(modalId, show) {
+            const modal = document.getElementById(modalId);
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
 
-        form.addEventListener("submit", handleFormSubmit);
+        function openScannerModal() {
+            toggleModal('scanner-modal', true);
+            setTimeout(() => { startScanner(); }, 300);
+        }
+
+        function closeScannerModal() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(err => console.log(err));
+            }
+            toggleModal('scanner-modal', false);
+        }
+
+        function startScanner() {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                async (decodedText) => {
+                    document.getElementById('scan-result').innerText = `Detected ID: ${decodedText}`;
+                    await markAttendanceDirect(decodedText.trim());
+                    closeScannerModal();
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                document.getElementById('scan-result').innerText = "Camera permission needed or not found.";
+            });
+        }
+
+        async function loadDashboardData() {
+            try {
+                const { data: allMembers, count: totalCount, error: totalError } = await _supabase
+                    .from('members')
+                    .select('*', { count: 'exact' });
+                
+                if (!totalError && allMembers) {
+                    document.getElementById('total-members').innerText = totalCount || 0;
+                    document.getElementById('active-members').innerText = totalCount || 0;
+
+                    const pendingCount = allMembers.filter(m => m.payment_status === 'Pending').length;
+                    document.getElementById('pending-fees').innerText = pendingCount;
+                }
+
+                const todayStr = new Date().toISOString().split('T')[0];
+                const { count: attCount, error: attError } = await _supabase
+                    .from('attendance')
+                    .select('*', { count: 'exact', head: true })
+                    .gte('created_at', todayStr);
+
+                if (!attError) {
+                    document.getElementById('today-attendance').innerText = attCount || 0;
+                }
+
+                const { data: members, error: membersError } = await _supabase
+                    .from('members')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                const tbody = document.getElementById('members-table-body');
+                if (membersError) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-400">Error loading data: ${membersError.message}</td></tr>`;
+                    return;
+                }
+
+                if (members && members.length > 0) {
+                    tbody.innerHTML = '';
+                    members.forEach(m => {
+                        tbody.innerHTML += `
+                            <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
+                                <td class="p-3 font-mono text-gold-400">${m.member_id || 'NFC-' + m.id}</td>
+                                <td class="p-3 font-semibold text-white">${m.full_name}</td>
+                                <td class="p-3">${m.mobile_number}</td>
+                                <td class="p-3">${m.membership_plan || 'Standard'}</td>
+                                <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${m.payment_status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}">${m.payment_status || 'Pending'}</span></td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-zinc-500">No members found yet. Add your first member!</td></tr>`;
+                }
+
+            } catch (err) {
+                console.error('Connection Error:', err);
+            }
+        }
 
         async function handleFormSubmit(event) {
             event.preventDefault();
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.innerText = 'Saving...';
 
-            if (!form.reportValidity()) return;
+            const full_name = document.getElementById('full_name').value;
+            const mobile_number = document.getElementById('mobile_number').value;
+            const membership_plan = document.getElementById('membership_plan').value;
+            const payment_status = document.getElementById('payment_status').value;
+            const member_id = 'NFC-' + Math.floor(1000 + Math.random() * 9000);
 
-            const fullName = document.getElementById("fullName").value.trim();
-            const mobile = document.getElementById("mobile").value.trim();
-            const ageValue = document.getElementById("age").value;
-            const gender = document.getElementById("gender").value;
-            const plan = document.getElementById("plan").value;
-            const amountValue = document.getElementById("amount").value;
-            const status = document.getElementById("status").value;
+            const { error } = await _supabase
+                .from('members')
+                .insert([{ member_id, full_name, mobile_number, membership_plan, payment_status }]);
 
-            if (!/^[0-9]{10}$/.test(mobile)) {
-                message.textContent = "Please enter a valid 10-digit mobile number.";
-                message.className = "text-sm text-center text-red-400";
-                return;
-            }
+            saveBtn.innerText = 'Save Member';
 
-            const age = ageValue === "" ? null : Number(ageValue);
-            const amount = amountValue === "" ? null : Number(amountValue);
-
-            if (age !== null && (!Number.isInteger(age) || age < 1 || age > 120)) {
-                message.textContent = "Please enter a valid age.";
-                message.className = "text-sm text-center text-red-400";
-                return;
-            }
-
-            if (amount !== null && (!Number.isFinite(amount) || amount < 0)) {
-                message.textContent = "Please enter a valid fees amount.";
-                message.className = "text-sm text-center text-red-400";
-                return;
-            }
-
-            const memberId = "NFC-" + crypto.randomUUID().toUpperCase();
-
-            const memberData = {
-                member_id: memberId,
-                full_name: fullName,
-                mobile: mobile,
-                age: age,
-                gender: gender || null,
-                plan: plan,
-                amount: amount,
-                status: status
-            };
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            message.textContent = "Saving member details...";
-            message.className = "text-sm text-center text-yellow-400";
-
-            try {
-                const { error } = await db
-                    .from("members")
-                    .insert([memberData]);
-
-                if (error) {
-                    throw error;
-                }
-
-                message.textContent = "Member registered successfully!";
-                message.className = "text-sm text-center text-green-400";
-
-                alert(
-                    "Member Registered Successfully!\n\n" +
-                    "Member ID: " + memberId
-                );
-
-                form.reset();
-
-                window.location.href = "admin.html";
-
-            } catch (error) {
-                console.error("Registration error:", error);
-
-                message.textContent = "Registration failed: " + error.message;
-                message.className = "text-sm text-center text-red-400";
-
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> REGISTER MEMBER';
+            if (error) {
+                alert('Error saving member: ' + error.message);
+            } else {
+                alert('Member added successfully! ID: ' + member_id);
+                toggleModal('add-member-modal', false);
+                document.getElementById('add-member-form').reset();
+                loadDashboardData();
             }
         }
-    </script>
 
+        async function markAttendanceDirect(member_id) {
+            const { error } = await _supabase
+                .from('attendance')
+                .insert([{ member_id }]);
+
+            if (error) {
+                alert('Error marking attendance: ' + error.message);
+            } else {
+                alert('Attendance marked successfully for ID: ' + member_id);
+                loadDashboardData();
+            }
+        }
+
+        async function handleAttendanceSubmit(event) {
+            event.preventDefault();
+            const member_id = document.getElementById('attendance_member_id').value.trim();
+            if(!member_id) return;
+            await markAttendanceDirect(member_id);
+            closeScannerModal();
+            document.getElementById('attendance_member_id').value = '';
+        }
+
+        async function handleSelfAttendance(event) {
+            event.preventDefault();
+            const member_id = document.getElementById('self_member_id').value.trim();
+            if(!member_id) return;
+
+            const btn = document.getElementById('self-att-btn');
+            btn.innerText = 'Checking in...';
+
+            const { error } = await _supabase
+                .from('attendance')
+                .insert([{ member_id }]);
+
+            btn.innerText = '✅ Check-in / Mark Attendance';
+
+            if (error) {
+                alert('Error: Member ID not found or invalid! (' + error.message + ')');
+            } else {
+                alert('🎉 Attendance Marked Successfully for ID: ' + member_id);
+                toggleModal('self-attendance-modal', false);
+                document.getElementById('self_member_id').value = '';
+                loadDashboardData();
+            }
+        }
+
+        async function handleFeesSubmit(event) {
+            event.preventDefault();
+            const feesBtn = document.getElementById('fees-btn');
+            feesBtn.innerText = 'Updating...';
+
+            const member_id = document.getElementById('fees_member_id').value.trim();
+            const payment_status = document.getElementById('fees_status').value;
+
+            const { error } = await _supabase
+                .from('members')
+                .update({ payment_status: payment_status })
+                .eq('member_id', member_id);
+
+            feesBtn.innerText = 'Update Payment';
+
+            if (error) {
+                alert('Error updating payment: ' + error.message);
+            } else {
+                alert('Payment status updated to ' + payment_status + ' for ID: ' + member_id);
+                toggleModal('fees-modal', false);
+                document.getElementById('fees_member_id').value = '';
+                loadDashboardData();
+            }
+        }
+
+        loadDashboardData();
+    </script>
 </body>
 </html>
-```
